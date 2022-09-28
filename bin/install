@@ -3,25 +3,20 @@
 set -euo pipefail
 
 ver() {
-  echo "${1}" | awk -F . '{ printf("%02d%02d", $1,$2); }'
+  echo "$1" | awk -F . '{ printf("%02d%02d", $1,$2); }'
 }
 
 main() {
-  local version="${ASDF_INSTALL_VERSION}"
-  local path="${ASDF_INSTALL_PATH}"
-  if [[ "${1}" == "ghc" ]] || ([[ "${1}" == "hls"  ]] && [[ $(ver "$version") -ge $(ver "1.7") ]])
-  then
-    ghcup install "${1}" "${version}" -i "${path}"
-  else
-    ghcup install "${1}" "${version}" -i "${path}/bin"
-  fi
+  local version="$ASDF_INSTALL_VERSION"
+  local path="$ASDF_INSTALL_PATH"
+  [[ "$1" = 'ghc' || "$1" = 'hls' && (($(ver "$version") > $(ver '1.6'))) ]] || path="$path/bin"
+  ghcup install "$1" "$version" -i "$path"
 }
 
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]
-then
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
   current_script_path=${BASH_SOURCE[0]}
   plugin_dir=$(dirname "$(dirname "$current_script_path")")
   toolname=$(basename "$plugin_dir")
 
-  main "${toolname}"
+  main "$toolname"
 fi
